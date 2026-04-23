@@ -6,7 +6,18 @@ Cloudflare Worker dashboard and API for Pico W temperature/humidity telemetry.
 
 `GET /` or `GET /dashboard`
 
-Opens the built-in dashboard with live charts and the latest readings table.
+Opens the built-in dashboard with live charts, a day selector, and the latest readings table.
+
+Dashboard assets are also available at:
+
+```text
+GET /dashboard.css
+GET /dashboard.js
+```
+
+`GET /reading-days`
+
+Returns the most recent available reading dates in `YYYY-MM-DD` format for the dashboard day selector.
 
 `POST /ingest`
 
@@ -30,6 +41,13 @@ Body:
 `GET /readings?limit=100`
 
 Returns recent readings from D1.
+
+Optional query params:
+
+```text
+day=YYYY-MM-DD
+device=<device-name>
+```
 
 ## Setup
 

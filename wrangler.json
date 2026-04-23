@@ -1,0 +1,16 @@
+{
+	"compatibility_date": "2025-10-08",
+	"main": "src/index.ts",
+	"name": "iot-testapp",
+	"upload_source_maps": true,
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_id": "dd27a74f-aadf-43e1-abfa-fea2fd5d845b",
+			"database_name": "iot-testdb"
+		}
+	],
+	"observability": {
+		"enabled": true
+	}
+}

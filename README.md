@@ -1,59 +1,71 @@
-# Worker + D1 Database
+# iot-testapp
 
-[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/cloudflare/templates/tree/main/d1-template)
+Cloudflare Worker API for Pico W temperature/humidity telemetry.
 
-![Worker + D1 Template Preview](https://imagedelivery.net/wSMYJvS3Xw-n339CbDyDIA/cb7cb0a9-6102-4822-633c-b76b7bb25900/public)
+## Endpoints
 
-<!-- dash-content-start -->
+`POST /ingest`
 
-D1 is Cloudflare's native serverless SQL database ([docs](https://developers.cloudflare.com/d1/)). This project demonstrates using a Worker with a D1 binding to execute a SQL statement. A simple frontend displays the result of this query:
+Stores one sensor reading in D1. Requires:
 
-```SQL
-SELECT * FROM comments LIMIT 3;
+```text
+Authorization: Bearer <INGEST_TOKEN>
+Content-Type: application/json
 ```
 
-The D1 database is initialized with a `comments` table and this data:
+Body:
 
-```SQL
-INSERT INTO comments (author, content)
-VALUES
-    ('Kristian', 'Congrats!'),
-    ('Serena', 'Great job!'),
-    ('Max', 'Keep up the good work!')
-;
+```json
+{
+  "device": "pico-sht3x",
+  "temperature": 23.89,
+  "humidity": 36.2
+}
 ```
 
-> [!IMPORTANT]
-> When using C3 to create this project, select "no" when it asks if you want to deploy. You need to follow this project's [setup steps](https://github.com/cloudflare/templates/tree/main/d1-template#setup-steps) before deploying.
+`GET /readings?limit=100`
 
-<!-- dash-content-end -->
+Returns recent readings from D1.
 
-## Getting Started
+## Setup
 
-Outside of this repo, you can start a new project with this template using [C3](https://developers.cloudflare.com/pages/get-started/c3/) (the `create-cloudflare` CLI):
+The Worker is already configured in `wrangler.json`:
 
+```text
+Worker: iot-testapp
+D1 database: iot-testdb
+D1 binding: DB
 ```
-npm create cloudflare@latest -- --template=cloudflare/templates/d1-template
+
+Apply the D1 migration:
+
+```bash
+npx wrangler d1 migrations apply DB --remote
 ```
 
-A live public deployment of this template is available at [https://d1-template.templates.workers.dev](https://d1-template.templates.workers.dev)
+Create the ingest secret:
 
-## Setup Steps
+```bash
+npx wrangler secret put INGEST_TOKEN
+```
 
-1. Install the project dependencies with a package manager of your choice:
-   ```bash
-   npm install
-   ```
-2. Create a [D1 database](https://developers.cloudflare.com/d1/get-started/) with the name "d1-template-database":
-   ```bash
-   npx wrangler d1 create d1-template-database
-   ```
-   ...and update the `database_id` field in `wrangler.json` with the new database ID.
-3. Run the following db migration to initialize the database (notice the `migrations` directory in this project):
-   ```bash
-   npx wrangler d1 migrations apply --remote d1-template-database
-   ```
-4. Deploy the project!
-   ```bash
-   npx wrangler deploy
-   ```
+Deploy:
+
+```bash
+npm run deploy
+```
+
+Test reading data:
+
+```bash
+curl https://iot-testapp.<your-workers-subdomain>.workers.dev/readings
+```
+
+Test inserting data:
+
+```bash
+curl -X POST https://iot-testapp.<your-workers-subdomain>.workers.dev/ingest \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <INGEST_TOKEN>" \
+  -d '{"device":"test-device","temperature":23.89,"humidity":36.2}'
+```

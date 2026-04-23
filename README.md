@@ -1,8 +1,12 @@
 # iot-testapp
 
-Cloudflare Worker API for Pico W temperature/humidity telemetry.
+Cloudflare Worker dashboard and API for Pico W temperature/humidity telemetry.
 
 ## Endpoints
+
+`GET /` or `GET /dashboard`
+
+Opens the built-in dashboard with live charts and the latest readings table.
 
 `POST /ingest`
 
@@ -59,6 +63,12 @@ Test reading data:
 
 ```bash
 curl https://iot-testapp.<your-workers-subdomain>.workers.dev/readings
+```
+
+Open the dashboard:
+
+```text
+https://iot-testapp.<your-workers-subdomain>.workers.dev/
 ```
 
 Test inserting data:

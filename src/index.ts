@@ -1,3 +1,5 @@
+import { renderDashboardHtml } from "./renderDashboard";
+
 interface AppEnv extends Env {
 	INGEST_TOKEN?: string;
 }
@@ -18,7 +20,19 @@ function jsonResponse(body: unknown, init: ResponseInit = {}) {
 	return Response.json(body, {
 		...init,
 		headers: {
+			"cache-control": "no-store",
 			...corsHeaders,
+			...init.headers,
+		},
+	});
+}
+
+function htmlResponse(body: string, init: ResponseInit = {}) {
+	return new Response(body, {
+		...init,
+		headers: {
+			"content-type": "text/html; charset=utf-8",
+			"cache-control": "no-store",
 			...init.headers,
 		},
 	});
@@ -138,10 +152,15 @@ export default {
 			return handleReadings(request, env);
 		}
 
+		if ((url.pathname === "/" || url.pathname === "/dashboard") && request.method === "GET") {
+			return htmlResponse(renderDashboardHtml());
+		}
+
 		return jsonResponse({
 			ok: true,
 			name: "iot-testapp",
 			endpoints: {
+				dashboard: "GET /dashboard",
 				ingest: "POST /ingest",
 				readings: "GET /readings?limit=100",
 			},
